@@ -8,6 +8,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:background="#D9E4FA"
+        android:visibility="gone"
         android:padding="4dp" />
 
     <ImageView
