@@ -9,11 +9,6 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
-import org.xml.sax.XMLReader;
-
-import twitter4j.HashtagEntity;
-import twitter4j.UserMentionEntity;
-
 import com.voskalenko.twitterlist.R;
 import com.voskalenko.twitterlist.db.DatabaseManager;
 import com.voskalenko.twitterlist.model.TwitterObj;
@@ -22,13 +17,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.text.Editable;
-import android.text.Html;
-import android.text.Html.TagHandler;
-import android.text.Spannable;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
-import android.text.style.ClickableSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,7 +29,6 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class TwitterListAdapter extends BaseAdapter implements Filterable {
 
@@ -52,39 +42,6 @@ public class TwitterListAdapter extends BaseAdapter implements Filterable {
 	private SimpleDateFormat formater;
 	private final Context ctx;
 
-	private final TagHandler tagHandler = new TagHandler() {
-
-		@Override
-		public void handleTag(boolean opening, String tag,
-				Editable output, XMLReader xmlReader) {
-			
-			if (!tag.equals("html") && !tag.equals("body"))
-				processSpan(opening, output, new HashTagSpan(ctx, tag));
-		}
-
-		private void processSpan(boolean opening, Editable output, Object span) {
-			int posEnd = output.length();
-			if (opening)
-				output.setSpan(span, posEnd, posEnd,Spannable.SPAN_MARK_MARK);
-			else {
-				Object[] objs = output.getSpans(0, posEnd, span.getClass());
-				int posStart = posEnd;
-				if (objs.length > 0) {
-					for (int i = objs.length - 1; i >= 0; --i) {
-						if (output.getSpanFlags(objs[i]) == Spannable.SPAN_MARK_MARK) {
-							posStart = output.getSpanStart(objs[i]);
-							output.removeSpan(objs[i]);
-							break;
-						}
-					}
-				}
-
-				if (posStart != posEnd)
-					output.setSpan(span, posStart, posEnd, 
-							Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-			}
-		}
-	};
 	
 	private final Filter filter = new Filter() {
 
@@ -192,10 +149,9 @@ public class TwitterListAdapter extends BaseAdapter implements Filterable {
 				holder.txtCreatedAt.setText(twitterObj.getCreatedAt().getTime().toString());
 				
 				String text = twitterObj.getText();
-				text = wrapWithTags(text, (Object[])twitterObj.getHashtagEntities());
-				text = wrapWithTags(text, (Object[])twitterObj.getUserMantionEntities());
+				Spanned output = HightLightTag.getSpanned(ctx, text, (Object[])twitterObj.getHashtagEntities());
 				
-				holder.txtDescription.setText(Html.fromHtml(text, null, tagHandler));
+				holder.txtDescription.setText(output);
 				break;
 	
 			case TYPE_GROUP_HEADER:
@@ -206,54 +162,6 @@ public class TwitterListAdapter extends BaseAdapter implements Filterable {
 		return convertView;
 	}
 	
-	private String wrapWithTags(String text, Object[] entity)  {
-		String strTag = null;
-		for(int i = 0; i < entity.length; i++) {
-			if(entity[i] instanceof HashtagEntity)
-				strTag = "#" + ((HashtagEntity)entity[i]).getText();
-			else strTag = "@" + ((UserMentionEntity)entity[i]).getScreenName();
-			text = text.replaceAll("(?i)" + strTag, String.format("<%1$s>%1$s</%1$s>", strTag));
-		}
-		
-		return text;
-	}
-	
-	/*private String wrapWithHashTags(String str) {
-		int posStart;
-		int posNext = 1;
-		while ((posStart = str.indexOf("#", posNext)) != -1) {
-			int posEnd = 0;
-			
-			if((posEnd = str.indexOf(" ", posStart)) == -1)
-				if((posEnd = str.indexOf(":", posStart)) == -1)
-					posEnd = str.length();
-			
-			String hashTag = str.substring(posStart, posEnd).replace(":", "");
-			String linkHashTag = String.format("<%1$s>%1$s</%1$s>", hashTag);
-			str = str.replace(hashTag, linkHashTag);
-			posNext += posStart + linkHashTag.length();
-		}
-		
-		return str;
-	}*/
-
-	private class HashTagSpan extends ClickableSpan {
-
-		private final Context ctx;
-		private String hashTag;
-
-		public HashTagSpan(Context ctx, String hashTag) {
-			super();
-			this.ctx = ctx;
-			this.hashTag = hashTag;
-		}
-
-		@Override
-		public void onClick(View view) {
-			Toast.makeText(ctx, hashTag, Toast.LENGTH_SHORT).show();
-		}
-	}
-
 	static class UiHolder {
 		ImageView imgPhoto;
 		TextView txtUser;
