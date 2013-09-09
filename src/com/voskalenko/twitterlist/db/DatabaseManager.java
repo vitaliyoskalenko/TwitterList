@@ -3,7 +3,6 @@ package com.voskalenko.twitterlist.db;
 import java.sql.SQLException;
 import java.util.List;
 
-import com.j256.ormlite.stmt.SelectArg;
 import com.voskalenko.twitterlist.model.TwitterObj;
 import com.voskalenko.twitterlist.model.UserObj;
 

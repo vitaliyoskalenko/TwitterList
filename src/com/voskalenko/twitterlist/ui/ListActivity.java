@@ -44,7 +44,7 @@ public class ListActivity extends Activity implements AbsListView.OnScrollListen
 	
 	private Twitter twitter;
 	private DatabaseManager dbMng;
-	private List<TwitterObj> twitterLst = new ArrayList<TwitterObj>();
+	private List<TwitterObj> twitterLst;
 	private Calendar createdAt = Calendar.getInstance();
 
 
@@ -53,14 +53,6 @@ public class ListActivity extends Activity implements AbsListView.OnScrollListen
 		super.onCreate(savedInstanceState);
 		getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
 		setContentView(R.layout.activity_list);
-
-		/*String str = "jhgsfdgs   #kjhkjh kjkjhkjh #jklhkjh kjhkj";
-		int pos = str.indexOf("#");
-		int po3 = str.indexOf("#", pos + 1);
-		int pos2 = str.indexOf(" ", pos);
-		String str2 = String.format("<a href=\"%1$s\">%1$s</a>", str.substring(pos, pos2));
-		String str3 = str.replace(str.substring(pos, pos2), str2);*/
-		
 		
 		DatabaseManager.init(this);
 		dbMng = DatabaseManager.getInstance();
@@ -72,6 +64,8 @@ public class ListActivity extends Activity implements AbsListView.OnScrollListen
 		userName = (TextView) findViewById(R.id.txt_user_name);
 
 		twitterLst = dbMng.getAllTwitterHomeLines();
+		if(twitterLst == null)
+			twitterLst = new ArrayList<TwitterObj>();
 		userObj = dbMng.getUser(0);
 		
 		adapter = new TwitterListAdapter(ListActivity.this, twitterLst);
@@ -80,7 +74,7 @@ public class ListActivity extends Activity implements AbsListView.OnScrollListen
 
 		userName.setText(getString(R.string.lines_owner, userObj == null ? "" : userObj.getName()));
 		
-		// gets Twitter instance with appTimelines credentials
+		//gets Twitter instance with appTimelines credentials
 		AccessToken accessToken = new AccessToken(
 				Constants.OAUTH_ACCESS_TOKEN,
 				Constants.OAUTH_ACCESS_TOKEN_SECRET);
@@ -162,8 +156,9 @@ public class ListActivity extends Activity implements AbsListView.OnScrollListen
 						status.getUser().getId(), status.getUser().getName(), 
 						status.getUser().getProfileImageURL());
 					createdAt.setTime(status.getCreatedAt());
-					TwitterObj twitterObj = new TwitterObj(status.getId(), createdAt, status.getURLEntities(),
+					TwitterObj twitterObj = new TwitterObj(status.getId(), createdAt, status.getHashtagEntities(), status.getUserMentionEntities(),
 							status.getPlace() == null ? "unknown" : status.getPlace().getName(), status.getText(), userObjChild);
+					
 					twitterLst.add(twitterObj);
 				}
 			} catch (TwitterException e) {

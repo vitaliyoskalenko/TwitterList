@@ -14,9 +14,9 @@ import com.voskalenko.twitterlist.model.UserObj;
 
 public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 	
-	private static final String DATABASE_NAME = "twitter2.sqlite";
+	private static final String DATABASE_NAME = "twitter7.sqlite";
 
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 7;
     private Dao<TwitterObj, Integer> twitterHomeLinesDao = null;
     private Dao<UserObj, Integer> userDao = null;
     

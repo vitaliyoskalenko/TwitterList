@@ -11,6 +11,9 @@ import java.util.Locale;
 
 import org.xml.sax.XMLReader;
 
+import twitter4j.HashtagEntity;
+import twitter4j.UserMentionEntity;
+
 import com.voskalenko.twitterlist.R;
 import com.voskalenko.twitterlist.db.DatabaseManager;
 import com.voskalenko.twitterlist.model.TwitterObj;
@@ -26,8 +29,6 @@ import android.text.Spannable;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
-import android.text.style.StrikethroughSpan;
-import android.text.util.Linkify;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -56,29 +57,30 @@ public class TwitterListAdapter extends BaseAdapter implements Filterable {
 		@Override
 		public void handleTag(boolean opening, String tag,
 				Editable output, XMLReader xmlReader) {
+			
 			if (!tag.equals("html") && !tag.equals("body"))
 				processSpan(opening, output, new HashTagSpan(ctx, tag));
 		}
 
 		private void processSpan(boolean opening, Editable output, Object span) {
-			int len = output.length();
+			int posEnd = output.length();
 			if (opening)
-				output.setSpan(span, len, len,Spannable.SPAN_MARK_MARK);
+				output.setSpan(span, posEnd, posEnd,Spannable.SPAN_MARK_MARK);
 			else {
-				Object[] objs = output.getSpans(0, len, span.getClass());
-				int where = len;
+				Object[] objs = output.getSpans(0, posEnd, span.getClass());
+				int posStart = posEnd;
 				if (objs.length > 0) {
 					for (int i = objs.length - 1; i >= 0; --i) {
 						if (output.getSpanFlags(objs[i]) == Spannable.SPAN_MARK_MARK) {
-							where = output.getSpanStart(objs[i]);
+							posStart = output.getSpanStart(objs[i]);
 							output.removeSpan(objs[i]);
 							break;
 						}
 					}
 				}
 
-				if (where != len)
-					output.setSpan(span, where, len, 
+				if (posStart != posEnd)
+					output.setSpan(span, posStart, posEnd, 
 							Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 			}
 		}
@@ -119,13 +121,11 @@ public class TwitterListAdapter extends BaseAdapter implements Filterable {
 	};
 
 	public int getItemViewType(int position) {
-		Calendar prevDate = twitterLst.get(position - 1 < 0 ? 0 : position - 1)
-				.getCreatedAt();
+		Calendar prevDate = twitterLst.get(position - 1 < 0 ? 0 : position - 1).getCreatedAt();
 		Calendar thisDate = twitterLst.get(position).getCreatedAt();
 
 		return prevDate.get(Calendar.DAY_OF_MONTH) == thisDate
-				.get(Calendar.DAY_OF_MONTH) && position > 0 ? TYPE_ITEM
-				: TYPE_GROUP_HEADER;
+				.get(Calendar.DAY_OF_MONTH) && position > 0 ? TYPE_ITEM : TYPE_GROUP_HEADER;
 
 	};
 
@@ -181,26 +181,44 @@ public class TwitterListAdapter extends BaseAdapter implements Filterable {
 		} else {
 			holder = (UiHolder) convertView.getTag();
 		}
-
+		
+		TwitterObj twitterObj = twitterLst.get(position);
+		
 		switch (getItemViewType(position)) {
 			case TYPE_ITEM:
-				String url = twitterLst.get(position).getUser().getProfileImageURL();
+				String url = twitterObj.getUser().getProfileImageURL();
 				new DownloadPhotoTask(holder.imgPhoto).execute(url);
-				holder.txtUser.setText(twitterLst.get(position).getUser().getName());
-				holder.txtCreatedAt.setText(twitterLst.get(position).getCreatedAt().getTime().toString());
-				String text = twitterLst.get(position).getText();
-				holder.txtDescription.setText(Html.fromHtml(wrapWithHashTags(text), null, tagHandler));
+				holder.txtUser.setText(twitterObj.getUser().getName());
+				holder.txtCreatedAt.setText(twitterObj.getCreatedAt().getTime().toString());
+				
+				String text = twitterObj.getText();
+				text = wrapWithTags(text, (Object[])twitterObj.getHashtagEntities());
+				text = wrapWithTags(text, (Object[])twitterObj.getUserMantionEntities());
+				
+				holder.txtDescription.setText(Html.fromHtml(text, null, tagHandler));
 				break;
 	
 			case TYPE_GROUP_HEADER:
-				holder.txtHeader.setText(formater.format(twitterLst.get(position).getCreatedAt().getTime()));
+				holder.txtHeader.setText(formater.format(twitterObj.getCreatedAt().getTime()));
 				break;
 		}
 
 		return convertView;
 	}
 	
-	private String wrapWithHashTags(String str) {
+	private String wrapWithTags(String text, Object[] entity)  {
+		String strTag = null;
+		for(int i = 0; i < entity.length; i++) {
+			if(entity[i] instanceof HashtagEntity)
+				strTag = "#" + ((HashtagEntity)entity[i]).getText();
+			else strTag = "@" + ((UserMentionEntity)entity[i]).getScreenName();
+			text = text.replaceAll("(?i)" + strTag, String.format("<%1$s>%1$s</%1$s>", strTag));
+		}
+		
+		return text;
+	}
+	
+	/*private String wrapWithHashTags(String str) {
 		int posStart;
 		int posNext = 1;
 		while ((posStart = str.indexOf("#", posNext)) != -1) {
@@ -217,7 +235,7 @@ public class TwitterListAdapter extends BaseAdapter implements Filterable {
 		}
 		
 		return str;
-	}
+	}*/
 
 	private class HashTagSpan extends ClickableSpan {
 

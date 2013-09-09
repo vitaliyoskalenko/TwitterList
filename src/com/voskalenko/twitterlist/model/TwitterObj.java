@@ -6,7 +6,8 @@ import java.util.Calendar;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 
-import twitter4j.URLEntity;
+import twitter4j.HashtagEntity;
+import twitter4j.UserMentionEntity;
 
 public class TwitterObj {
 	
@@ -14,7 +15,10 @@ public class TwitterObj {
 	private long id;
 	@DatabaseField(dataType = DataType.SERIALIZABLE)
 	private Calendar createdAt; 
-	private URLEntity[] uRLentities; 
+	@DatabaseField(dataType = DataType.SERIALIZABLE)
+	private HashtagEntity[] hashtagEntities; 
+	@DatabaseField(dataType = DataType.SERIALIZABLE)
+	private UserMentionEntity[] userMantionEntities;
 	@DatabaseField
 	private String place;
 	@DatabaseField
@@ -25,11 +29,12 @@ public class TwitterObj {
 	public TwitterObj() {
 	}
 	
-	public TwitterObj(long id, Calendar createdAt, URLEntity[] uRLentities,
+	public TwitterObj(long id, Calendar createdAt, HashtagEntity[] hashtagEntities, UserMentionEntity[] userMantionEntities,
 			String place, String text, UserObj user) {
 		this.id = id;
 		this.createdAt = createdAt;
-		this.uRLentities = uRLentities;
+		this.hashtagEntities = hashtagEntities;
+		this.userMantionEntities = userMantionEntities;
 		this.place = place;
 		this.text = text;
 		this.user = user;
@@ -38,18 +43,26 @@ public class TwitterObj {
 	public Calendar getCreatedAt() {
 		return createdAt;
 	}
-	public URLEntity[] getURLentities() {
-		return uRLentities;
+	public HashtagEntity[] getHashtagEntities() {
+		return hashtagEntities;
 	}
+	
+	public UserMentionEntity[] getUserMantionEntities() {
+		return userMantionEntities;
+	}
+	
 	public long getId() {
 		return id;
 	}
+	
 	public String getPlace() {
 		return place;
 	}
+	
 	public String getText() {
 		return text;
 	}
+	
 	public UserObj getUser() {
 		return user;
 	}
