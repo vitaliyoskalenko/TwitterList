@@ -5,9 +5,7 @@ import java.util.Calendar;
 
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
-
-import twitter4j.HashtagEntity;
-import twitter4j.UserMentionEntity;
+import com.voskalenko.twitterlist.ui.HashTagHightLighter;
 
 public class TwitterObj {
 	
@@ -16,9 +14,9 @@ public class TwitterObj {
 	@DatabaseField(dataType = DataType.SERIALIZABLE)
 	private Calendar createdAt; 
 	@DatabaseField(dataType = DataType.SERIALIZABLE)
-	private HashtagEntity[] hashtagEntities; 
+	private HashTagHightLighter.Entity[] hashtagEntities; 
 	@DatabaseField(dataType = DataType.SERIALIZABLE)
-	private UserMentionEntity[] userMantionEntities;
+	private HashTagHightLighter.Entity[] userMantionEntities;
 	@DatabaseField
 	private String place;
 	@DatabaseField
@@ -29,7 +27,7 @@ public class TwitterObj {
 	public TwitterObj() {
 	}
 	
-	public TwitterObj(long id, Calendar createdAt, HashtagEntity[] hashtagEntities, UserMentionEntity[] userMantionEntities,
+	public TwitterObj(long id, Calendar createdAt, HashTagHightLighter.Entity[] hashtagEntities, HashTagHightLighter.Entity[] userMantionEntities,
 			String place, String text, UserObj user) {
 		this.id = id;
 		this.createdAt = createdAt;
@@ -43,11 +41,11 @@ public class TwitterObj {
 	public Calendar getCreatedAt() {
 		return createdAt;
 	}
-	public HashtagEntity[] getHashtagEntities() {
+	public HashTagHightLighter.Entity[] getHashtagEntities() {
 		return hashtagEntities;
 	}
 	
-	public UserMentionEntity[] getUserMantionEntities() {
+	public HashTagHightLighter.Entity[] getUserMantionEntities() {
 		return userMantionEntities;
 	}
 	

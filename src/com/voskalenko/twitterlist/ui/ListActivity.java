@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import twitter4j.HashtagEntity;
 import twitter4j.Paging;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.User;
+import twitter4j.UserMentionEntity;
 import twitter4j.auth.AccessToken;
 
 import com.voskalenko.twitterlist.Constants;
@@ -16,6 +18,7 @@ import com.voskalenko.twitterlist.R;
 import com.voskalenko.twitterlist.db.DatabaseManager;
 import com.voskalenko.twitterlist.model.TwitterObj;
 import com.voskalenko.twitterlist.model.UserObj;
+import com.voskalenko.twitterlist.ui.HashTagHightLighter.Entity;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -45,6 +48,7 @@ public class ListActivity extends Activity implements AbsListView.OnScrollListen
 	private Twitter twitter;
 	private DatabaseManager dbMng;
 	private List<TwitterObj> twitterLst;
+	private AsyncTask task = new GetHomeTimelineTask();
 	private Calendar createdAt = Calendar.getInstance();
 
 
@@ -127,10 +131,11 @@ public class ListActivity extends Activity implements AbsListView.OnScrollListen
 	public void onScroll(AbsListView view, int firstVisible,
 			int visibleCount, int totalCount) {
 			boolean loadMore = firstVisible + visibleCount >= totalCount;
-			if (loadMore) {
-				new GetHomeTimelineTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, ++curPage);// .execute();
-				Log.i(TAG, "Home lines are loading " + curPage);
-			}
+			if (loadMore)
+				if(task.getStatus() != AsyncTask.Status.RUNNING) {
+					task =  new GetHomeTimelineTask().execute(++curPage);
+					Log.i(TAG, "Home lines are loading " + curPage);
+				}
 	}
 	
 	class GetHomeTimelineTask extends AsyncTask<Integer, List<TwitterObj>, List<TwitterObj>> {
@@ -156,7 +161,19 @@ public class ListActivity extends Activity implements AbsListView.OnScrollListen
 						status.getUser().getId(), status.getUser().getName(), 
 						status.getUser().getProfileImageURL());
 					createdAt.setTime(status.getCreatedAt());
-					TwitterObj twitterObj = new TwitterObj(status.getId(), createdAt, status.getHashtagEntities(), status.getUserMentionEntities(),
+					
+					HashTagHightLighter.Entity[] hashTagEntities = new HashTagHightLighter.Entity[status.getHashtagEntities().length];
+					HashTagHightLighter.Entity[] userMentionEntities = new HashTagHightLighter.Entity[status.getUserMentionEntities().length];;
+					
+					int i = 0;
+					for(HashtagEntity entity : status.getHashtagEntities())
+						hashTagEntities[i++] = new Entity(entity.getText(), entity.getStart(), entity.getEnd()); 
+					
+					i = 0;
+					for(UserMentionEntity entity : status.getUserMentionEntities())
+						userMentionEntities[i++] = new HashTagHightLighter.Entity(entity.getScreenName(), entity.getStart(), entity.getEnd());
+					
+					TwitterObj twitterObj = new TwitterObj(status.getId(), createdAt, hashTagEntities, userMentionEntities,
 							status.getPlace() == null ? "unknown" : status.getPlace().getName(), status.getText(), userObjChild);
 					
 					twitterLst.add(twitterObj);
@@ -179,4 +196,12 @@ public class ListActivity extends Activity implements AbsListView.OnScrollListen
 			progress.dismiss();
 		}
 	}
+	
+	@Override
+	protected void onDestroy() {
+		if(!task.isCancelled())
+			task.cancel(true);
+		super.onDestroy();
+	}
+	
 }

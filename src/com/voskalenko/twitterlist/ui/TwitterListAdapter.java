@@ -149,7 +149,9 @@ public class TwitterListAdapter extends BaseAdapter implements Filterable {
 				holder.txtCreatedAt.setText(twitterObj.getCreatedAt().getTime().toString());
 				
 				String text = twitterObj.getText();
-				Spanned output = HightLightTag.getSpanned(ctx, text, (Object[])twitterObj.getHashtagEntities());
+				
+				Spanned output = HashTagHightLighter.hightLightSpan(ctx, text, twitterObj.getHashtagEntities(),
+						twitterObj.getUserMantionEntities());
 				
 				holder.txtDescription.setText(output);
 				break;
