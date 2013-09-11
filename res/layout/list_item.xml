@@ -48,8 +48,6 @@
         android:layout_below="@+id/txt_created_at"
         android:layout_marginLeft="22dp"
         android:layout_toRightOf="@+id/img_photo"
-        android:linksClickable="true"
-        android:autoLink="web|all"
         android:textSize="12sp" />
 
 </RelativeLayout>

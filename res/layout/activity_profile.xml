@@ -1,0 +1,70 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="5dp" >
+
+    <ImageView
+        android:id="@+id/img_user_photo"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="8dp"
+        android:src="@android:drawable/btn_default" />
+
+    <TextView
+        android:id="@+id/txt_user_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/img_user_photo"
+        android:layout_marginLeft="14dp"
+        android:layout_toRightOf="@id/img_user_photo"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="8dp"
+        android:src="@drawable/ic_tweet" />
+
+    <TextView
+        android:id="@+id/txt_user_description"
+        style="@style/descriptionStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@id/img_user_photo"
+        android:layout_below="@id/img_user_photo" />
+
+    <ListView
+        android:id="@+id/lst_items"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/txt_user_description"
+        android:layout_marginTop="8dp"
+        android:dividerHeight="1dp"
+        android:padding="8dp" />
+
+    <TextView
+        android:id="@+id/txt_user_hashtag"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@id/txt_user_name"
+        android:layout_below="@id/txt_user_name"
+        android:textColor="@android:color/holo_green_light"
+        android:textSize="10sp" />
+    
+    <TextView
+        android:id="@+id/txt_user_entity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/txt_user_hashtag"
+        android:layout_below="@+id/txt_user_hashtag"
+        android:autoLink="web"
+        android:textSize="10sp" />
+
+</RelativeLayout>

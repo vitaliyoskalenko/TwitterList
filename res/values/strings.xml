@@ -6,5 +6,15 @@
     <string name="wait_dialog">Wait for a moment</string>
     <string name="lines_owner">Лента новостей: %s</string>
     <string name="action_search">Фильтр ленты</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_profile">Profile</string>
 
+    <string-array name="profile_items">
+        <item>Tweets</item>
+        <item>Favorities</item>
+        <item>Following</item>
+        <item>Followers</item>
+        <item>Listed</item>
+    </string-array>
+    
 </resources>

@@ -14,6 +14,7 @@
         android:id="@+id/lst_timelines"
         android:layout_width="fill_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1"/>
+        android:layout_weight="1" 
+        />
 
 </LinearLayout>

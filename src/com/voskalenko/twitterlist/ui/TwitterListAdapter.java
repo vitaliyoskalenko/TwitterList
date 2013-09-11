@@ -9,6 +9,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
+import com.voskalenko.twitterlist.DownloadPhotoTask;
 import com.voskalenko.twitterlist.R;
 import com.voskalenko.twitterlist.db.DatabaseManager;
 import com.voskalenko.twitterlist.model.TwitterObj;
@@ -107,7 +108,7 @@ public class TwitterListAdapter extends BaseAdapter implements Filterable {
 	}
 
 	public long getItemId(int position) {
-		return position;
+		return twitterLst == null ? 0 : twitterLst.get(position).getUser().getId();
 	}
 
 	public View getView(int position, View convertView, ViewGroup parent) {
@@ -123,8 +124,7 @@ public class TwitterListAdapter extends BaseAdapter implements Filterable {
 					holder.txtUser = (TextView) convertView.findViewById(R.id.txt_user);
 					holder.txtCreatedAt = (TextView) convertView.findViewById(R.id.txt_created_at);
 					holder.txtDescription = (TextView) convertView.findViewById(R.id.txt_description);
-					holder.txtDescription.setLinksClickable(true);
-					holder.txtDescription.setMovementMethod(LinkMovementMethod.getInstance());
+					//holder.txtDescription.setMovementMethod(LinkMovementMethod.getInstance());
 					break;
 	
 				case TYPE_GROUP_HEADER:
@@ -170,50 +170,6 @@ public class TwitterListAdapter extends BaseAdapter implements Filterable {
 		TextView txtCreatedAt;
 		TextView txtDescription;
 		TextView txtHeader;
-	}
-
-	public class DownloadPhotoTask extends AsyncTask<String, Bitmap, Bitmap> {
-
-		private final WeakReference<ImageView> imgPhotoRef;
-
-		public DownloadPhotoTask(ImageView imgPhoto) {
-			imgPhotoRef = new WeakReference<ImageView>(imgPhoto);
-		}
-
-		@Override
-		protected void onPreExecute() {
-			setPhoto(null);
-			super.onPreExecute();
-		}
-
-		@Override
-		protected Bitmap doInBackground(String... url) {
-			URL urlPhoto = null;
-			Bitmap bmp = null;
-			try {
-				urlPhoto = new URL(url[0]);
-				bmp = BitmapFactory.decodeStream(urlPhoto.openConnection()
-						.getInputStream());
-			} catch (MalformedURLException e) {
-				Log.e(TAG, "Failed to get photo");
-			} catch (IOException e) {
-				Log.e(TAG, "Failed to get photo");
-			}
-			return bmp;
-		}
-
-		@Override
-		protected void onPostExecute(Bitmap bmp) {
-			setPhoto(bmp);
-
-		}
-
-		private void setPhoto(Bitmap bmp) {
-			final ImageView imgPhoto = imgPhotoRef.get();
-			if (imgPhoto != null) {
-				imgPhoto.setImageBitmap(bmp);
-			}
-		}
 	}
 
 }

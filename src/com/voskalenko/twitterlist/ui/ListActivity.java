@@ -24,19 +24,23 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
 
-public class ListActivity extends Activity implements AbsListView.OnScrollListener{
+public class ListActivity extends Activity implements AbsListView.OnScrollListener, ListView.OnItemClickListener{
 
 	private static final String TAG = ListActivity.class.getSimpleName();
-
+	public static final String USER_ID = "user_id";
+	
 	private int curPage = 0;
 	
 	private ListView timeLinesLstView;
@@ -73,6 +77,7 @@ public class ListActivity extends Activity implements AbsListView.OnScrollListen
 		userObj = dbMng.getUser(0);
 		
 		adapter = new TwitterListAdapter(ListActivity.this, twitterLst);
+		timeLinesLstView.setOnItemClickListener(this);
 		timeLinesLstView.setAdapter(adapter);
 		timeLinesLstView.setOnScrollListener(this);
 
@@ -138,6 +143,16 @@ public class ListActivity extends Activity implements AbsListView.OnScrollListen
 				}
 	}
 	
+	
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int position,
+			long id) {
+		long userId = parent.getItemIdAtPosition(position);
+		Intent intent = new Intent(this, ProfileActivity.class);
+		intent.putExtra(USER_ID, userId);
+		startActivity(intent);
+	}
+	
 	class GetHomeTimelineTask extends AsyncTask<Integer, List<TwitterObj>, List<TwitterObj>> {
 		
 		@Override
@@ -151,15 +166,18 @@ public class ListActivity extends Activity implements AbsListView.OnScrollListen
 				
 				if(userObj != null) {
 					User user = twitter.verifyCredentials();
-					userObj = new UserObj(0, user.getName(), null);
+					
+					userObj = new UserObj();
+					userObj = new UserObj(0, user.getName(), null, null, null, 0, 0, 0, 0);
 				}
 				
 				Paging pg = new Paging(page[0]);
 				List<twitter4j.Status> statuses = twitter.getHomeTimeline(pg);
 				for (twitter4j.Status status : statuses) { 
+					User user = status.getUser();
 					UserObj userObjChild = new UserObj(
-						status.getUser().getId(), status.getUser().getName(), 
-						status.getUser().getProfileImageURL());
+						user.getId(), user.getName(), user.getProfileImageURL(), user.getDescription(), user.getURL(), 
+						user.getFavouritesCount(), user.getFriendsCount(), user.getFollowersCount(), user.getListedCount());
 					createdAt.setTime(status.getCreatedAt());
 					
 					HashTagHightLighter.Entity[] hashTagEntities = new HashTagHightLighter.Entity[status.getHashtagEntities().length];
@@ -203,5 +221,6 @@ public class ListActivity extends Activity implements AbsListView.OnScrollListen
 			task.cancel(true);
 		super.onDestroy();
 	}
+
 	
 }
